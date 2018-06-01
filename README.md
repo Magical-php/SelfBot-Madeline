@@ -6,3 +6,5 @@ Install MadelineProto (https://github.com/danog/MadelineProto/) <br />
 Run bot.php in Terminal or Browser <br />
 Login into Your Account <br />
 Set Cronjob or screen the source 
+
+By: <a href="https://t.me/NovinDev">@NovinDev</a>
