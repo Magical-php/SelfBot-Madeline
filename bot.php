@@ -1,4 +1,9 @@
 <?php
+/*
+Self-Bot Based On MadeLine
+By: @NovinDev Team
+t.me/NovinDev
+*/
 ob_start();
 if (!file_exists('madeline.php')) {
     copy('https://phar.madelineproto.xyz/madeline.php', 'madeline.php');
