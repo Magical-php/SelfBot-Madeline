@@ -20,8 +20,8 @@ $settings =
 				'system_version' => ''.rand(1,10),
 				'app_version' => 'No Proxy',
 				'lang_code' => 'fa',
-				'api_id' => 178166,
-				'api_hash' => '6b0029d8fe3c0be367adb686e840ab31'
+				'api_id' => 1234,
+				'api_hash' => 'API_Hash'
 		],
 
 
