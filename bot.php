@@ -21,7 +21,7 @@ $settings =
 				'app_version' => 'No Proxy',
 				'lang_code' => 'fa',
 				'api_id' => 1234,
-				'api_hash' => 'API_Hash'
+				'api_hash' => 'API_HASH'
 		],
 
 
@@ -71,18 +71,18 @@ while (true) {
 				case 'updateEditMessage':
 					if(isset($update['update'])){
 						$up = $update['update'];
-						if(isset($up['message'])){
+						if(isset($update['update']['message'])){
 							$message = $up['message'];
 						}
-						if(isset($message['message'])){
-							$text = strtolower($message['message']);
+						if(isset($update['update']['message']['message'])){
+							$text = strtolower($up['message']['message']);
 						}
 						if(isset($update['update']['message']['from_id'])){
-							$from_id = $update['update']['message']['from_id'];
+							$from_id = $up['message']['from_id'];
 							$peer = $from_id;
 						}
 						if(isset($update['update']['message']['to_id']['channel_id'])){
-							$channel_id = $update['update']['message']['to_id']['channel_id'];
+							$channel_id = $up['message']['to_id']['channel_id'];
 							$peer = "-100".$channel_id;
 						}
 					}
@@ -90,33 +90,44 @@ while (true) {
 						if(preg_match("/^[\/\#\!]?(bot) (on|off)$/i", $text)){
 							preg_match("/^[\/\#\!]?(bot) (on|off)$/i", $text, $m);
 							$data['power'] = $m[2];
+							file_put_contents("data.json", json_encode($data));
 							$MadelineProto->messages->sendMessage(['peer' => $peer, 'message' => "Bot Now Is $m[2]", ]);
 						}
 						if($data['power'] == "on"){
 							if(preg_match("/^[\/\#\!]?(send2all)$/i", $text)){
 								$data['adminStep'] = "send2all";
+								file_put_contents("data.json", json_encode($data));
 								$MadelineProto->messages->sendMessage(['peer' => $peer, 'message' => "Send Me The Message", ]);
 							}
 							else if($step == "send2all"){
 								$dialogs = $MadelineProto->get_dialogs();
 								foreach ($dialogs as $peeer) {
-									$MadelineProto->messages->sendMessage(['peer' => $peeer, 'message' => $text]);
+									$peer_info = $MadelineProto->get_info($peeer);
+									$peer_type = $peer_info['type'];
+									if($peer_info == "supergroup" ||$peer_info == "user"||$peer_info == "chat"){
+										$MadelineProto->messages->sendMessage(['peer' => $peeer, 'message' => $text]);
+									}
 								}
-								$data['adminStep'] = "";
+								$data['adminStep'] = "none";
 								file_put_contents("data.json", json_encode($data));
 								$MadelineProto->messages->sendMessage(['peer' => $peer, 'message' => "sent"]);
 							}
 							
 							else if(preg_match("/^[\/\#\!]?(forward2all)$/i", $text)){
 								$data['adminStep'] = "forward2all";
+								file_put_contents("data.json", json_encode($data));
 								$MadelineProto->messages->sendMessage(['peer' => $peer, 'message' => 'Forward Me The Message']);
 							}
 							else if($step == "forward2all"){
 								$dialogs = $MadelineProto->get_dialogs();
 								foreach ($dialogs as $peeer) {
-									$MadelineProto->messages->forwardMessages(['from_peer' => $peer, 'to_peer' => $peeer, 'id' => [$message['id']], ]);
+									$peer_info = $MadelineProto->get_info($peeer);
+									$peer_type = $peer_info['type'];
+									if($peer_info == "supergroup" ||$peer_info == "user"||$peer_info == "chat"){
+										$MadelineProto->messages->forwardMessages(['from_peer' => $peer, 'to_peer' => $peeer, 'id' => [$message['id']], ]);
+									}
 								}
-								$data['adminStep'] = "";
+								$data['adminStep'] = "none";
 								file_put_contents("data.json", json_encode($data));
 								$MadelineProto->messages->sendMessage(['peer' => $peer, 'message' => "forwarded"]);
 							}
@@ -129,21 +140,25 @@ while (true) {
 							else if(preg_match("/^[\/\#\!]?(typing) (on|off)$/i", $text)){
 								preg_match("/^[\/\#\!]?(typing) (on|off)$/i", $text, $m);
 								$data['typing'] = $m[2];
+								file_put_contents("data.json", json_encode($data));
 								$MadelineProto->messages->sendMessage(['peer' => $peer, 'message' => "Typing Now Is $m[2]", ]);
 							}
 							else if(preg_match("/^[\/\#\!]?(poker) (on|off)$/i", $text)){
 								preg_match("/^[\/\#\!]?(poker) (on|off)$/i", $text, $m);
 								$data['poker'] = $m[2];
+								file_put_contents("data.json", json_encode($data));
 								$MadelineProto->messages->sendMessage(['peer' => $peer, 'message' => "Poker Now Is $m[2]", ]);
 							}
 							else if(preg_match("/^[\/\#\!]?(echo) (on|off)$/i", $text)){
 								preg_match("/^[\/\#\!]?(echo) (on|off)$/i", $text, $m);
 								$data['echo'] = $m[2];
+								file_put_contents("data.json", json_encode($data));
 								$MadelineProto->messages->sendMessage(['peer' => $peer, 'message' => "Echo Now Is $m[2]", ]);
 							}
 							else if(preg_match("/^[\/\#\!]?(markread) (on|off)$/i", $text)){
 								preg_match("/^[\/\#\!]?(markread) (on|off)$/i", $text, $m);
 								$data['markread'] = $m[2];
+								file_put_contents("data.json", json_encode($data));
 								$MadelineProto->messages->sendMessage(['peer' => $peer, 'message' => "Markread Now Is $m[2]", ]);
 							}
 							else if(preg_match("/^[\/\#\!]?(me)$/i", $text)){
@@ -233,6 +248,7 @@ while (true) {
 								$answeer = $m[3];
 								if(!isset($data['answering'][$txxt])){
 									$data['answering'][$txxt] = $answeer;
+									file_put_contents("data.json", json_encode($data));
 									$MadelineProto->messages->sendMessage(['peer' => $peer, 'message' => "New Word Added To AnswerList"]);
 								} else{
 									$MadelineProto->messages->sendMessage(['peer' => $peer, 'message' => "This Word Was In AnswerList"]);
@@ -276,6 +292,7 @@ while (true) {
 								$me_name = $me['first_name'];
 								if(!in_array($me_id, $data['enemies'])){
 									$data['enemies'][] = $me_id;
+									file_put_contents("data.json", json_encode($data));
 									$MadelineProto->contacts->block(['id' => $m[2], ]);
 									$MadelineProto->messages->sendMessage(['peer' => $peer, 'message' => "$me_name is now in enemy list"]);
 								} else{
@@ -814,7 +831,7 @@ region: ".$authorization['region']."
 					}
 					break;
 			}
-			file_put_contents("data.json", json_encode($data));
+			//file_put_contents("data.json", json_encode($data));
 		}
 	} catch(Exception $e){
 		$MadelineProto->messages->sendMessage(['peer' => $peer, 'message' => "❌ ERROR: \n$e"]);
